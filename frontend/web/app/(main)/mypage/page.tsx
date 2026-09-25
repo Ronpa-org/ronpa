@@ -10,6 +10,12 @@ import { getProfile } from "@/lib/profile";
 import { LangToggle, useLang } from "@/lib/i18n";
 
 export default function MyPage() {
+  const { user } = useAuth();
+  // アカウントが変わったら、前のユーザーの表示データをまとめて破棄する。
+  return <MyPageContent key={user?.id ?? "guest"} />;
+}
+
+function MyPageContent() {
   const { t } = useLang();
   const router = useRouter();
   const { user, signOut } = useAuth();
@@ -19,12 +25,7 @@ export default function MyPage() {
 
   // ログイン中は自分の対戦履歴とプロフィールを取得
   useEffect(() => {
-    if (!user) {
-      setBattles([]);
-      setProfileName("");
-      setAvatarUrl("");
-      return;
-    }
+    if (!user) return;
     let cancelled = false;
     getBattles().then((rows) => !cancelled && setBattles(rows));
     getProfile().then((p) => {

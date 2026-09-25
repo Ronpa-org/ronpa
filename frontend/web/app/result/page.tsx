@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { RadarChart } from "@/components/RadarChart";
 import { CrownIcon, LockIcon } from "@/components/icons";
 import { RESULT_STORAGE_KEY, type DebateScore } from "@/lib/api";
@@ -35,18 +35,29 @@ function fromApi(r: DebateScore): Stored {
   };
 }
 
+// 結果はこの画面への遷移前に保存される。描画中の変更通知は不要。
+const subscribeToResult = () => () => {};
+const serverResult = () => undefined;
+
+function readResult() {
+  try {
+    return sessionStorage.getItem(RESULT_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export default function ResultPage() {
   const { t } = useLang();
-  const [data, setData] = useState<Stored | null | undefined>(undefined);
-
-  useEffect(() => {
+  const raw = useSyncExternalStore(subscribeToResult, readResult, serverResult);
+  let data: Stored | null | undefined = raw === undefined ? undefined : null;
+  if (raw) {
     try {
-      const raw = sessionStorage.getItem(RESULT_STORAGE_KEY);
-      setData(raw ? fromApi(JSON.parse(raw)) : null);
+      data = fromApi(JSON.parse(raw));
     } catch {
-      setData(null);
+      data = null;
     }
-  }, []);
+  }
 
   if (data === undefined) {
     return (

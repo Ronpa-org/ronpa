@@ -93,10 +93,10 @@ export function AiRoomClient({
   useEffect(() => {
     if (!level || !side) return;
     let cancelled = false;
-    setError("");
     startDebate(level, side, currentLang())
       .then((s) => {
         if (cancelled) return;
+        setError("");
         setSession(s);
         setMessages([{ role: "ai", content: s.opening }]);
       })

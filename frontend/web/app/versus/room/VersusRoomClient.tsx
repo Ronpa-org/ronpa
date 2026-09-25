@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@/components/icons";
 import { supabase } from "@/lib/supabase";
@@ -28,7 +27,6 @@ export function VersusRoomClient({
   name: string;
   theme: string;
 }) {
-  const router = useRouter();
   const { t } = useLang();
 
   const mySide: VersusSide = role === "host" ? "肯定" : "否定";
@@ -45,7 +43,9 @@ export function VersusRoomClient({
   const channelRef = useRef<any>(null);
   const messagesRef = useRef<ChatMsg[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
-  messagesRef.current = messages;
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
     if (!supabase) return;

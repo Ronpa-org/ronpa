@@ -3,6 +3,7 @@
 日本語ネイティブ対応のリアルタイムディベート × AI採点プラットフォーム
 
 共同開発先は [Ronpa-org/ronpa](https://github.com/Ronpa-org/ronpa) です。
+現在地・担当分担・次の作業は [進捗メモ](docs/progress.md) にまとめています。
 開発前に [AGENTS.md](AGENTS.md) と [開発・CI・連携設定の手順](docs/development.md) を確認してください。
 以下には過去の構想も含まれます。実装済み・未確認の範囲は開発ガイドで区別しています。
 

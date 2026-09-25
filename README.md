@@ -2,11 +2,15 @@
 
 日本語ネイティブ対応のリアルタイムディベート × AI採点プラットフォーム
 
+共同開発先は [Ronpa-org/ronpa](https://github.com/Ronpa-org/ronpa) です。
+開発前に [AGENTS.md](AGENTS.md) と [開発・CI・連携設定の手順](docs/development.md) を確認してください。
+以下には過去の構想も含まれます。実装済み・未確認の範囲は開発ガイドで区別しています。
+
 ## 技術スタック
 - **バックエンド**: Python + FastAPI（[backend/](backend/README.md)）
 - **フロントエンド**: Next.js 16 + TypeScript + Tailwind CSS 4（frontend/web/）
 - **AI**: OpenAI GPT-4o（対戦相手 + 4軸採点）
-- **データベース**: Supabase (PostgreSQL) — 予定
+- **認証・データ保存・対人通信**: Supabase — 接続コードあり。DB・権限設定の再現手順は未整備
 - **課金**: Stripe — 予定
 
 ## ローカル開発
@@ -21,7 +25,7 @@ cp .env.example .env   # OPENAI_API_KEY を設定（未設定ならモックモ�
 
 # フロントエンド (http://localhost:3000)
 cd frontend/web
-npm install
+npm ci
 npm run dev
 ```
 

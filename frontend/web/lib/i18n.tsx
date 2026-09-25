@@ -4,8 +4,7 @@
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -764,14 +763,26 @@ const LangContext = createContext<{
   t: Dict;
 }>({ lang: "ja", setLang: () => {}, t: ja });
 
+const LANG_CHANGE_EVENT = "ronpa:language-change";
+
+function subscribeToLang(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(LANG_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(LANG_CHANGE_EVENT, onChange);
+  };
+}
+
+function serverLang(): Lang {
+  return "ja";
+}
+
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("ja");
-  useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) === "en") setLangState("en");
-  }, []);
+  const lang = useSyncExternalStore(subscribeToLang, currentLang, serverLang);
   const setLang = (l: Lang) => {
-    setLangState(l);
     localStorage.setItem(STORAGE_KEY, l);
+    window.dispatchEvent(new Event(LANG_CHANGE_EVENT));
   };
   return (
     <LangContext.Provider value={{ lang, setLang, t: translations[lang] }}>

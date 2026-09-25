@@ -73,42 +73,50 @@ function Avatar({
 export function RoomClient({ mode }: { mode: "ai" | "group" }) {
   const router = useRouter();
   const { t } = useLang();
-  const [phaseIdx, setPhaseIdx] = useState(0);
-  const [remaining, setRemaining] = useState(phases[0].dur);
+  const [{ phaseIdx, remaining }, setClock] = useState({
+    phaseIdx: 0,
+    remaining: phases[0].dur,
+  });
   const [micOn, setMicOn] = useState(true);
   const [memoOpen, setMemoOpen] = useState(false);
   const [memo, setMemo] = useState("");
-  const [floats, setFloats] = useState<{ id: number; emoji: string }[]>([]);
+  const [floats, setFloats] = useState<{ id: string; emoji: string }[]>([]);
 
   const phase = phases[phaseIdx];
   const isLast = phaseIdx === phases.length - 1;
 
   useEffect(() => {
-    const timer = setInterval(() => setRemaining((prev) => prev - 1), 1000);
+    const timer = setInterval(() => {
+      setClock((prev) => {
+        if (prev.remaining > 1) {
+          return { ...prev, remaining: prev.remaining - 1 };
+        }
+        if (prev.phaseIdx < phases.length - 1) {
+          const next = prev.phaseIdx + 1;
+          return { phaseIdx: next, remaining: phases[next].dur };
+        }
+        return prev.remaining === 0 ? prev : { ...prev, remaining: 0 };
+      });
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    if (remaining > 0) return;
-    if (phaseIdx >= phases.length - 1) {
+    if (remaining === 0 && isLast) {
       router.push("/result");
-      return;
     }
-    setPhaseIdx(phaseIdx + 1);
-    setRemaining(phases[phaseIdx + 1].dur);
-  }, [remaining, phaseIdx, router]);
+  }, [remaining, isLast, router]);
 
   const skip = () => {
     if (isLast) {
       router.push("/result");
       return;
     }
-    setPhaseIdx(phaseIdx + 1);
-    setRemaining(phases[phaseIdx + 1].dur);
+    setClock({ phaseIdx: phaseIdx + 1, remaining: phases[phaseIdx + 1].dur });
   };
 
-  const react = (emoji: string) => {
-    const id = Date.now() + Math.random();
+  const handleReaction = (emoji: string) => {
+    const id = crypto.randomUUID();
     setFloats((f) => [...f, { id, emoji }]);
     setTimeout(() => setFloats((f) => f.filter((x) => x.id !== id)), 1400);
   };
@@ -267,7 +275,7 @@ export function RoomClient({ mode }: { mode: "ai" | "group" }) {
           {reactionEmojis.map((emoji) => (
             <button
               key={emoji}
-              onClick={() => react(emoji)}
+              onClick={() => handleReaction(emoji)}
               className="rounded-full border border-line bg-surface-2 px-3 py-1 text-base hover:border-cyan/40 active:scale-110"
             >
               {emoji}
